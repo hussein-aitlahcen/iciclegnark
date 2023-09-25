@@ -40,7 +40,10 @@ func NttOnDevice(scalars_out, scalars_d, twiddles_d, coset_powers_d unsafe.Point
 func MsmOnDevice(scalars_d, points_d unsafe.Pointer, count int, convert bool) (curve.G1Jac, unsafe.Pointer, error) {
 	out_d, _ := goicicle.CudaMalloc(96)
 
-	icicle.Commit(out_d, scalars_d, points_d, count, 10)
+	res := icicle.Commit(out_d, scalars_d, points_d, count, 10)
+	if res != 0 {
+		return curve.G1Jac{}, nil, fmt.Errorf("Failed to commit %d", res)
+	}
 
 	if convert {
 		outHost := make([]icicle.G1ProjectivePoint, 1)
@@ -55,7 +58,10 @@ func MsmOnDevice(scalars_d, points_d unsafe.Pointer, count int, convert bool) (c
 func MsmG2OnDevice(scalars_d, points_d unsafe.Pointer, count int, convert bool) (curve.G2Jac, unsafe.Pointer, error) {
 	out_d, _ := goicicle.CudaMalloc(192)
 
-	icicle.CommitG2(out_d, scalars_d, points_d, count, 10)
+	res := icicle.CommitG2(out_d, scalars_d, points_d, count, 10)
+	if res != 0 {
+		return curve.G2Jac{}, nil, fmt.Errorf("Failed to commit %d", res)
+	}
 
 	if convert {
 		outHost := make([]icicle.G2Point, 1)
